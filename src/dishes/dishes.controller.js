@@ -19,13 +19,13 @@ function create(req, res) {
     dishes.push(newDish);
     res.status(201).json({ data: newDish });
 }
-function hasDescription(req, res, next) {
-    const { data: { description } = {} } = req.body;
+function hasName(req, res, next) {
+    const { data: { name } = {} } = req.body;
   
-    if (description) {
+    if (name) {
       return next();
     }
-    next({ status: 404, message: "A 'description' property is required." });
+    next({ status: 404, message: "A 'name' property is required." });
   }
 
 function list(req, res) {
@@ -64,7 +64,7 @@ res.json({data: dish})
 }
 
 module.exports = {
-    create:[hasDescription, create],
+    create:[hasName, create],
     list,
     read:[dishExists, read],
     update:[dishExists, update]
