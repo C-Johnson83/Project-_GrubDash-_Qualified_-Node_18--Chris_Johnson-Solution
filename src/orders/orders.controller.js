@@ -8,13 +8,14 @@ const nextId = require("../utils/nextId");
 
 // TODO: Implement the /orders handlers needed to make the tests pass
 function create (req, res) {
-    const { data: { deliverTo, mobileNumber, price, image_url } } = req.body;
+    const { data: { deliverTo, mobileNumber,status,dishes,quantity } } = req.body;
     const newDish = {
         id: nextId(),
         deliverTo: deliverTo,
         mobileNumber: mobileNumber,
-        price: price,
-        image_url: image_url
+        status: status,
+        dishes: dishes.find,
+        quantity: quantity
     };
     dishes.push(newDish);
     res.status(201).json({ data: newDish });
@@ -28,19 +29,30 @@ function hasDescription(req, res, next) {
     next({ status: 404, message: "A 'description' property is required." });
   }
 
-
-
-
-
-
-
-
 function list(req, res) {
     res.json({ data: orders });
 }
 
+function orderExists(req, res, next) {
+    const orderId = (req.params.orderId);
+    const foundOrder = orders.find((order) => order.id === orderId)
+    console.log(orderId, foundOrder);
+    if (foundOrder) {
+        res.locals.order = foundOrder
+    return next();
+}
+next({
+    status: 404,
+    message: `Order does not exist: ${req.params.orderId}`
+});
 
+}
+function read(req, res) {
+    res.json({ data: res.locals.order });
+}
 
 module.exports = {
-    list
+    create:[hasDescription, create],
+    list,
+    read: [orderExists, read]
 }
