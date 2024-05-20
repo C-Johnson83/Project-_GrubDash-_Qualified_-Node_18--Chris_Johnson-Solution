@@ -7,8 +7,8 @@ const orders = require(path.resolve("src/data/orders-data"));
 const nextId = require("../utils/nextId");
 
 // TODO: Implement the /orders handlers needed to make the tests pass
-function create (req, res) {
-    const { data: { deliverTo, mobileNumber,status,dishes,quantity } } = req.body;
+function create(req, res) {
+    const { data: { deliverTo, mobileNumber, status, dishes, quantity } } = req.body;
     const newDish = {
         id: nextId(),
         deliverTo: deliverTo,
@@ -22,12 +22,12 @@ function create (req, res) {
 }
 function hasDescription(req, res, next) {
     const { data: { description } = {} } = req.body;
-  
+
     if (description) {
-      return next();
+        return next();
     }
     next({ status: 404, message: "A 'description' property is required." });
-  }
+}
 
 function list(req, res) {
     res.json({ data: orders });
@@ -39,20 +39,41 @@ function orderExists(req, res, next) {
     console.log(orderId, foundOrder);
     if (foundOrder) {
         res.locals.order = foundOrder
-    return next();
-}
-next({
-    status: 404,
-    message: `Order does not exist: ${req.params.orderId}`
-});
+        return next();
+    }
+    next({
+        status: 404,
+        message: `Order does not exist: ${req.params.orderId}`
+    });
 
 }
 function read(req, res) {
     res.json({ data: res.locals.order });
 }
 
+function update(req, res) {
+    const order = res.locals.order;
+    const { data: { deliverTo, mobileNumber, status, dishes, quantity } = {} } = req.body;
+    order.deliverTo = deliverTo,
+        order.mobileNumber = mobileNumber,
+        order.status = status,
+
+
+        res.json({ data: order })
+
+
+}
+
+function destroy(req, res) {
+    const orderId = res.locals.order.id;
+    const index = orders.findIndex((order) => order.id === orderId);
+    const deleteOrder = orders.splice(index, 1);
+        res.json(`deleted`);
+    }
 module.exports = {
-    create:[hasDescription, create],
+    create: [hasDescription, create],
     list,
-    read: [orderExists, read]
+    read: [orderExists, read],
+    update: [orderExists, update],
+    delete:[orderExists, destroy]
 }
