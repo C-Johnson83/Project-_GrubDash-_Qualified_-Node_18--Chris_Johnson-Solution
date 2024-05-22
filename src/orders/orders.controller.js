@@ -68,7 +68,7 @@ function destroy(req, res) {
     const orderId = res.locals.order.id;
     const index = orders.findIndex((order) => order.id === orderId);
     const deleteOrder = orders.splice(index, 1);
-        res.json(`deleted`);
+    res.sendStatus(204);
     }
 module.exports = {
     create: [hasDescription, create],

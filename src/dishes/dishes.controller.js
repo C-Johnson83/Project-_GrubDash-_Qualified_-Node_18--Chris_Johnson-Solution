@@ -19,14 +19,29 @@ function create(req, res) {
     dishes.push(newDish);
     res.status(201).json({ data: newDish });
 }
-function hasName(req, res, next) {
-    const { data: { name } = {} } = req.body;
-  
-    if (name) {
+
+function hasParams(propertyName){
+  return function (req, res, next) {
+    const { data = {} } = req.body;
+    if (data[propertyName]) {
       return next();
     }
-    next({ status: 404, message: "A 'name' property is required." });
+      next({ status: 400, message: `Must include a ${propertyName}` });
   }
+  }
+
+function checkPrice(req, res, next) {
+  const { data: { price } = {} } = req.body;
+  const expPrice = 0
+  if(price < expPrice){
+    console.log(price)
+    console.log(expPrice)
+     return next({status:400, message: `Must include a price value greater than 0`} )
+  }
+   next()
+   
+  }
+
 
 function list(req, res) {
     res.json({ data: dishes });
@@ -34,7 +49,7 @@ function list(req, res) {
 function dishExists(req, res, next) {
     const dishId = (req.params.dishId);
     const foundDish = dishes.find((dish) => dish.id === dishId)
-    console.log(dishId, foundDish);
+ 
     if (foundDish) {
         res.locals.dish = foundDish
     return next();
@@ -64,8 +79,16 @@ res.json({data: dish})
 }
 
 module.exports = {
-    create:[hasName, create],
+    // create:[hasName, create],
+    create:[hasParams("name"),
+    hasParams("description"),
+    hasParams("price"),
+    hasParams("image_url"),
+    checkPrice, create],
     list,
     read:[dishExists, read],
-    update:[dishExists, update]
+    update:[dishExists,hasParams("name"),
+    hasParams("description"),
+    hasParams("price"),
+    hasParams("image_url"), update]
 }
