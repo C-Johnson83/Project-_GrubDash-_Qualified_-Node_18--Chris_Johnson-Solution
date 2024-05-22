@@ -64,19 +64,20 @@ next({
 function read(req, res) {
     res.json({ data: res.locals.dish });
 }
- 
-function update(req, res) {
-const dish = res.locals.dish;
-const { data: { name, description, price, image_url }={} } = req.body;
-dish.name = name,
-dish.description = description,
-dish.price = price,
-dish.image_url = image_url;
-
-res.json({data: dish})
-
-
+function idsMatch(req,res,next){
+  console.log(res.locals.dish)
+  res.json({ data: res.locals.dish });
 }
+function update(req, res) {
+  const dish = res.locals.dish;
+  const { data: { id, name, description, price, image_url }={} } = req.body;
+  dish.name = name,
+  dish.description = description,
+  dish.price = price,
+  dish.image_url = image_url;
+  
+  res.json({data: dish})
+  }
 
 module.exports = {
     // create:[hasName, create],
@@ -90,5 +91,5 @@ module.exports = {
     update:[dishExists,hasParams("name"),
     hasParams("description"),
     hasParams("price"),
-    hasParams("image_url"), update]
+    hasParams("image_url"), idsMatch, update]
 }

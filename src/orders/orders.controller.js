@@ -20,14 +20,15 @@ function create(req, res) {
     dishes.push(newDish);
     res.status(201).json({ data: newDish });
 }
-function hasDescription(req, res, next) {
-    const { data: { description } = {} } = req.body;
-
-    if (description) {
+function hasParams(propertyName){
+    return function (req, res, next) {
+      const { data = {} } = req.body;
+      if (data[propertyName]) {
         return next();
+      }
+        next({ status: 400, message: `Must include a ${propertyName}` });
     }
-    next({ status: 404, message: "A 'description' property is required." });
-}
+    }
 
 function list(req, res) {
     res.json({ data: orders });
@@ -70,8 +71,14 @@ function destroy(req, res) {
     const deleteOrder = orders.splice(index, 1);
     res.sendStatus(204);
     }
+    
 module.exports = {
-    create: [hasDescription, create],
+    create: [
+    hasParams("deliverTo"),
+    hasParams("mobileNumber"),
+    hasParams("Status"),
+    hasParams("dishes"),
+    hasParams("quantity"), create],
     list,
     read: [orderExists, read],
     update: [orderExists, update],
