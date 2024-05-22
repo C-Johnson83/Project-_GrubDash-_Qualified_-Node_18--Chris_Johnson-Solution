@@ -30,16 +30,12 @@ function hasParams(propertyName){
   }
   }
 
-function checkPrice(req, res, next) {
-  const { data: { price } = {} } = req.body;
-  const expPrice = 0
-  if(price < expPrice){
-    console.log(price)
-    console.log(expPrice)
-     return next({status:400, message: `Must include a price value greater than 0`} )
-  }
-   next()
-   
+  function checkPrice(req, res, next) {
+    const { data: { price } = {} } = req.body;
+    if (price === undefined || typeof price !== 'number' || price <= 0) {
+      return next({ status: 400, message: `Must include a valid price` });
+    }
+    next();
   }
 
 
@@ -64,9 +60,15 @@ next({
 function read(req, res) {
     res.json({ data: res.locals.dish });
 }
-function idsMatch(req,res,next){
-  console.log(res.locals.dish)
-  res.json({ data: res.locals.dish });
+function idsMatch(req, res, next) {
+  const { dishId } = req.params;
+  const { data: { id } = {} } = req.body;
+
+  if (id && id !== dishId) {
+    return next({ status: 400, message: `Dish id does not match route id. Dish: ${id}, Route: ${dishId}` });
+  }
+
+  next();
 }
 function update(req, res) {
   const dish = res.locals.dish;
@@ -85,11 +87,16 @@ module.exports = {
     hasParams("description"),
     hasParams("price"),
     hasParams("image_url"),
-    checkPrice, create],
+    checkPrice, 
+    create],
     list,
     read:[dishExists, read],
-    update:[dishExists,hasParams("name"),
+    update:[dishExists,
+    hasParams("name"),
     hasParams("description"),
     hasParams("price"),
-    hasParams("image_url"), idsMatch, update]
+    hasParams("image_url"), 
+    checkPrice,
+    idsMatch, 
+    update]
 }
