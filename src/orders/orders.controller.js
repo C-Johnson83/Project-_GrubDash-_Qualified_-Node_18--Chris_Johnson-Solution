@@ -83,21 +83,35 @@ function read(req, res) {
   res.json({ data: res.locals.order });
 }
 
+function idsMatch(req, res, next) {
+    const { orderId } = req.params;
+    const { data: { id } = {} } = req.body;
+  
+    if (id && id !== orderId) {
+      return next({ status: 400, message: `Order id does not match route id. Order: ${id}, Route: ${orderId}` });
+    }
+    next();
+}
 function update(req, res) {
   const order = res.locals.order;
   const { data: { deliverTo, mobileNumber, status, dishes, quantity } = {} } =
     req.body;
-  (order.deliverTo = deliverTo),
-    (order.mobileNumber = mobileNumber),
-    (order.status = status),
+  order.deliverTo = deliverTo,
+    order.mobileNumber = mobileNumber,
+    order.status = status,
     res.json({ data: order });
 }
 
-function destroy(req, res) {
+function destroy(req, res, next) {
   const orderId = res.locals.order.id;
-  const index = orders.findIndex((order) => order.id === orderId);
-  const deleteOrder = orders.splice(index, 1);
-  res.sendStatus(204);
+  const index = orders.findIndex((order) => order.id === orderId)
+  if(index.status !== "pending"){
+    const deleteOrder = orders.splice(index, 1);
+    res.sendStatus(204);
+   next
+  }
+
+  return res.sendStatus(400).json(`Status is pending`)
 }
 module.exports = {
   create: [
@@ -110,6 +124,10 @@ module.exports = {
   ],
   list,
   read: [orderExists, read],
-  update: [orderExists, update],
+  update: [orderExists,  
+  hasParams("deliverTo"),
+  hasParams("mobileNumber"),
+  hasParams("dishes"),
+  hasDishes,checkDishes,idsMatch, update],
   delete: [orderExists, destroy],
 };
