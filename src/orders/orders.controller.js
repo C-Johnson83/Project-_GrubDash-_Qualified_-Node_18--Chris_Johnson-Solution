@@ -11,7 +11,6 @@ function create(req, res) {
   const {
     data: { deliverTo, mobileNumber, dishes },
   } = req.body;
-  console.log(dishes)
   const newOrder = {
     id: nextId(),
     deliverTo: deliverTo,
@@ -67,7 +66,7 @@ function checkDishes(req, res, next) {
 }
   function checkStatus(req, res, next) {
     const { data: { status } = {} } = req.body;
-    if (status === undefined|| status=== "invalid"|| status <= 0) {
+    if (status === undefined|| status === "invalid"|| status <= 0) {
       return next({ status: 400, message: `Order must have a status of pending, preparing, out-for-delivery, delivered` });
     }
     next();
@@ -111,14 +110,16 @@ function update(req, res) {
 
 function destroy(req, res, next) {
   const orderId = res.locals.order.id;
-  const index = orders.findIndex((order) => order.id === orderId)
-  if(index.status !== "pending"){
-    const deleteOrder = orders.splice(index, 1);
-    res.sendStatus(204);
-   next
-  }
 
-  return res.sendStatus(400).json(`Status is pending`)
+  const foundOrder = orders.find((order) => order.id === orderId)
+console.log(foundOrder.status)
+  if(foundOrder.status !== 'pending'){
+    return next({ status: 400, message:`An order cannot be deleted unless it is pending.`});
+  }
+  const deleteOrder = orders.splice(foundOrder, 1);
+  res.sendStatus(204);
+ next
+ 
 }
 module.exports = {
   create: [
