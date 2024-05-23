@@ -29,7 +29,16 @@ function hasParams(propertyName){
         next({ status: 400, message: `Must include a ${propertyName}` });
     }
     }
+function hasDishes(req, res, next) {
+ 
+  const { data: { dishes } = {} } = req.body;
+  
+  if (!Array.isArray(dishes)||dishes.length === 0  ){
 
+ return next({ status: 400, message: "Must include at least one dish" });
+    }
+    next();
+}
 function list(req, res) {
     res.json({ data: orders });
 }
@@ -76,7 +85,7 @@ module.exports = {
     hasParams("deliverTo"),
     hasParams("mobileNumber"),
     hasParams("dishes"),
-    hasParams("quantity"), create],
+    hasDishes, create],
     list,
     read: [orderExists, read],
     update: [orderExists, update],
