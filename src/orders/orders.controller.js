@@ -8,13 +8,13 @@ const nextId = require("../utils/nextId");
 
 // TODO: Implement the /orders handlers needed to make the tests pass
 function create(req, res) {
-    const { data: { deliverTo, mobileNumber, status, dishes, quantity } } = req.body;
+    const { data: { deliverTo, mobileNumber,  dishes, quantity } } = req.body;
     const newDish = {
         id: nextId(),
         deliverTo: deliverTo,
         mobileNumber: mobileNumber,
-        status: status,
-        dishes: dishes.find,
+
+        dishes: dishes,
         quantity: quantity
     };
     dishes.push(newDish);
@@ -37,7 +37,7 @@ function list(req, res) {
 function orderExists(req, res, next) {
     const orderId = (req.params.orderId);
     const foundOrder = orders.find((order) => order.id === orderId)
-    console.log(orderId, foundOrder);
+   
     if (foundOrder) {
         res.locals.order = foundOrder
         return next();
@@ -71,12 +71,10 @@ function destroy(req, res) {
     const deleteOrder = orders.splice(index, 1);
     res.sendStatus(204);
     }
-    
 module.exports = {
     create: [
     hasParams("deliverTo"),
     hasParams("mobileNumber"),
-    hasParams("Status"),
     hasParams("dishes"),
     hasParams("quantity"), create],
     list,
