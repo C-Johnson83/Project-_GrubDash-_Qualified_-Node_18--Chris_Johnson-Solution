@@ -65,6 +65,13 @@ function checkDishes(req, res, next) {
 
   next();
 }
+  function checkStatus(req, res, next) {
+    const { data: { status } = {} } = req.body;
+    if (status === undefined|| status=== "invalid"|| status <= 0) {
+      return next({ status: 400, message: `Order must have a status of pending, preparing, out-for-delivery, delivered` });
+    }
+    next();
+  }
 
 function orderExists(req, res, next) {
   const orderId = req.params.orderId;
@@ -128,6 +135,9 @@ module.exports = {
   hasParams("deliverTo"),
   hasParams("mobileNumber"),
   hasParams("dishes"),
-  hasDishes,checkDishes,idsMatch, update],
+  hasDishes,
+  checkDishes,
+  idsMatch,
+  checkStatus,  update],
   delete: [orderExists, destroy],
 };
